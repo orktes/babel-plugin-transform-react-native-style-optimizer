@@ -86,7 +86,7 @@ module.exports = function (opts) {
         },
 
         exit(path, state) {
-          let styles = state.styles.map(function (path) {
+          let styles = _.map(state.styles, function (path) {
             return {
               node: path.node,
               paths: [path]
@@ -117,14 +117,14 @@ module.exports = function (opts) {
           let styleSheetIdentifier = state.styleSheetIdentifier;
           if (styles.length > 0) {
             const id = path.scope.generateUidIdentifier("styles");
-            const styleObj = t.objectExpression(styles.map(function (style, i) {
+            const styleObj = t.objectExpression(_.map(styles, function (style, i) {
               const identifier = t.identifier(`s${i}`);
               const node = style.node;
               const styleObjReference = t.memberExpression(
                 id,
                 identifier
               );
-              style.paths.forEach(function (path) {
+              _.each(style.paths, function (path) {
                 path.replaceWith(styleObjReference);
                 if (t.isArrayExpression(path.parentPath)) {
                   const arrayExpressionNode = path.parentPath.node;
