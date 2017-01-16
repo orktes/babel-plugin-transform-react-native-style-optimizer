@@ -15,6 +15,7 @@ module.exports = function (opts) {
   function compareObjectProps(aProperty, bProperty) {
     aProperty = aProperty[0] || aProperty;
     bProperty = bProperty[0] || bProperty;
+    
     if (t.isObjectProperty(aProperty) && t.isObjectProperty(bProperty)) {
       const aName = getPropertyName(aProperty);
       const bName = getPropertyName(bProperty);
