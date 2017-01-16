@@ -6,12 +6,30 @@ module.exports = function (opts) {
   const t = opts.types;
 
   function getPropertyName(prop) {
-    prop = prop[0];
+    prop = prop;
     if (t.isObjectProperty(prop) && t.isIdentifier(prop.key)) {
       return prop.key.name;
     }
 
     return '';
+  }
+
+  function compareObjectProps(aProperty, bProperty) {
+    aProperty = aProperty[0] || aProperty;
+    bProperty = bProperty[0] || bProperty;
+    if (t.isObjectProperty(aProperty) && t.isObjectProperty(bProperty)) {
+      const aName = getPropertyName(aProperty);
+      const bName = getPropertyName(bProperty);
+
+      if (aName !== bName) {
+        return false;
+      }
+
+      if (t.isLiteral(aProperty.value) && t.isLiteral(bProperty.value)) {
+        return aProperty.value.value === bProperty.value.value;
+      }
+    }
+    return false;
   }
 
   function isJSXAttributeOfName(attr, name) {
@@ -79,26 +97,16 @@ module.exports = function (opts) {
           styles = _.uniqWith(styles, function (fstyle, style) {
             const node = style.node;
             const fnode = fstyle.node;
+
+            if (node.properties.length !== fnode.properties.length) {
+              return;
+            }
+
             const isEqual = _.isEqualWith(
               _.sortBy(node.properties, getPropertyName),
               _.sortBy(fnode.properties, getPropertyName),
-              function (aProperty, bProperty) {
-                aProperty = aProperty[0];
-                bProperty = bProperty[0];
-                if (t.isObjectProperty(aProperty) && t.isObjectProperty(bProperty)) {
-                  const aName = getPropertyName(aProperty);
-                  const bName = getPropertyName(bProperty);
-
-                  if (aName !== bName) {
-                    return false;
-                  }
-
-                  if (t.isLiteral(aProperty.value) && t.isLiteral(bProperty.value)) {
-                    return true;
-                  }
-                }
-                return false;
-            });
+              compareObjectProps
+            );
 
             if (isEqual) {
               style.paths = _.concat(fstyle.paths, style.paths);
@@ -108,17 +116,27 @@ module.exports = function (opts) {
 
           let styleSheetIdentifier = state.styleSheetIdentifier;
           if (styles.length > 0) {
-            // TODO dedup can be done here
             const id = path.scope.generateUidIdentifier("styles");
             const styleObj = t.objectExpression(styles.map(function (style, i) {
               const identifier = t.identifier(`s${i}`);
               const node = style.node;
+              const styleObjReference = t.memberExpression(
+                id,
+                identifier
+              );
               style.paths.forEach(function (path) {
-                path.replaceWith(t.memberExpression(
-                  id,
-                  identifier
-                ));
-              })
+                path.replaceWith(styleObjReference);
+                if (t.isArrayExpression(path.parentPath)) {
+                  const arrayExpressionNode = path.parentPath.node;
+                  // Ugly but it 1:30am and I'm tired
+                  // TODO make sure uniq actually maintains order
+                  arrayExpressionNode.elements = _.uniq(arrayExpressionNode.elements.reverse()).reverse();
+                }
+              });
+              /*
+
+              */
+
 
               return t.objectProperty(identifier, node);
             }));

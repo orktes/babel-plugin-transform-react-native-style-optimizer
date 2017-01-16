@@ -1,7 +1,7 @@
 {
   "name": "babel-plugin-transform-react-native-style-optimizer",
   "version": "0.0.1",
-  "description": "",
+  "description": "Optimize inline style attributes in react-native. Removes duplicate style definitions and moves styles to a StyleSheet.",
   "main": "src/index.js",
   "scripts": {
     "test": "mocha test/index.js --reporter dot --ui tdd --timeout 10000 --compilers js:babel-register"
