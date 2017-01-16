@@ -1,0 +1,33 @@
+{
+  "name": "babel-plugin-transform-react-native-style-optimizer",
+  "version": "0.0.1",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha test/index.js --reporter dot --ui tdd --timeout 10000 --compilers js:babel-register"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orktes/babel-plugin-transform-react-native-style-optimizer.git"
+  },
+  "author": "Jaakko Lukkari <jaakko@unity3d.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/orktes/babel-plugin-transform-react-native-style-optimizer/issues"
+  },
+  "homepage": "https://github.com/orktes/babel-plugin-transform-react-native-style-optimizer#readme",
+  "keywords": [
+    "babel-plugin"
+  ],
+  "dependencies": {
+    "babel-register": "^6.18.0",
+    "babel-runtime": "^6.0.0"
+  },
+  "devDependencies": {
+    "babel-plugin-syntax-jsx": "^6.18.0",
+    "babel-preset-react": "^6.16.0",
+    "chai": "^3.5.0",
+    "lodash": "^4.17.4",
+    "mocha": "^3.2.0"
+  }
+}
