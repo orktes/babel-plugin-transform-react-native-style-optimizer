@@ -1,7 +1,5 @@
 var _ = require('lodash');
 
-
-
 module.exports = function (opts) {
   const t = opts.types;
 
@@ -93,7 +91,7 @@ module.exports = function (opts) {
             }
           });
 
-          // De-dublicate
+          // De-duplicate
           styles = _.uniqWith(styles, function (fstyle, style) {
             const node = style.node;
             const fnode = fstyle.node;
@@ -133,10 +131,6 @@ module.exports = function (opts) {
                   arrayExpressionNode.elements = _.uniq(arrayExpressionNode.elements.reverse()).reverse();
                 }
               });
-              /*
-
-              */
-
 
               return t.objectProperty(identifier, node);
             }));
