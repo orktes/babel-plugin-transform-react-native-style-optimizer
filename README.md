@@ -1,6 +1,8 @@
 # babel-plugin-transform-react-native-style-optimizer
 > Optimize inline style attributes in react-native. Removes duplicate style definitions and moves styles to a StyleSheet.
 
+[![Build Status](https://travis-ci.org/orktes/babel-plugin-transform-react-native-style-optimizer.svg?branch=master)](https://travis-ci.org/orktes/babel-plugin-transform-react-native-style-optimizer)
+
 ## Example
 
 **In**
