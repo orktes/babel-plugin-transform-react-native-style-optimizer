@@ -13,6 +13,11 @@ function fozNot() {
   <View style={{ width: BAR.width }} />; // Not okay to optimize
 }
 
+function faaNot() {
+  <View style={{ width: Math.random() }} />; // Not okay to optimize
+}
+
+
 function bizNot() {
   <View style={{width: width, height: height}} />; // Not okay to optimize
 }

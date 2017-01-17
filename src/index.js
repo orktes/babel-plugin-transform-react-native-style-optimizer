@@ -40,6 +40,12 @@ module.exports = function (opts) {
       path.stop();
     },
 
+    CallExpression(path, state) {
+      // Not exactly a local ref but something we can verify to stay the same
+      state.local_refs = true;
+      path.stop();
+    },
+
     Identifier(path, state) {
       if (t.isProperty(path.parentPath.node) && path.parentKey === 'key') {
         return;

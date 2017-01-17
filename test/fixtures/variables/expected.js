@@ -13,6 +13,11 @@ var BAR={width:100};
 React.createElement(View,{style:{width:BAR.width}});
 }
 
+function faaNot(){
+React.createElement(View,{style:{width:Math.random()}});
+}
+
+
 function bizNot(){
 React.createElement(View,{style:{width:width,height:height}});
 }
