@@ -1,23 +1,31 @@
 var width=200;
 var CONSTS={width:100};
-function foo(){
+var height=100;
+
+function fooNot(){
 var width=100;
+height=100;
 React.createElement(View,{style:{width:width}});
 }
 
-function foz(){
+function fozNot(){
 var BAR={width:100};
 React.createElement(View,{style:{width:BAR.width}});
 }
 
-function bar(){
-React.createElement(View,{style:{width:width}});
+function bizNot(){
+React.createElement(View,{style:{width:width,height:height}});
 }
 
-function baz(){
-React.createElement(View,{style:{width:CONSTS.width}});
+
+function barOkay(){
+React.createElement(View,{style:_styles.s2});
 }
 
-function zoo(){
+function bazOkay(){
+React.createElement(View,{style:_styles.s3});
+}
+
+function zooNot(){
 React.createElement(View,{style:{width:this.width()}});
-}var _styles=require("react-native").StyleSheet.create({s0:{width:width},s1:{width:CONSTS.width}});
+}var _styles=require("react-native").StyleSheet.create({s0:{width:width},s1:{width:CONSTS.width},s2:{width:width},s3:{width:CONSTS.width}});

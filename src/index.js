@@ -48,7 +48,7 @@ module.exports = function (opts) {
       const binding = path.scope.getBinding(path.node.name);
 
       if (binding && binding.scope) {
-        if (!t.isProgram(binding.scope.block)) {
+        if (!t.isProgram(binding.scope.block) || !binding.constant) {
           state.local_refs = true;
           path.stop();
         }
@@ -56,7 +56,7 @@ module.exports = function (opts) {
     }
   };
 
-  const traverseExpression = {
+  const traverseStyleExpression = {
     ObjectExpression(path, state) {
       var objstate = {};
       path.traverse(traverseObjectExpression, objstate);
@@ -66,6 +66,32 @@ module.exports = function (opts) {
       }
 
       path.skip();
+    }
+  };
+
+  const traverseCreateElementCalls = {
+    // Find React.createElementCalls
+    CallExpression(path, state) {
+      const node = path.node;
+
+      if (
+          !t.isMemberExpression(node.callee) ||
+          !t.isIdentifier(node.callee.object, {name: 'React'}) ||
+          !t.isIdentifier(node.callee.property, {name: 'createElement'})) {
+        return;
+      }
+
+      path.traverse({
+        ObjectProperty(path, state) {
+          if (
+            t.isIdentifier(path.node.key, {name: 'style'})
+          ) {
+            path.traverse(traverseStyleExpression, state);
+          }
+
+          path.skip();
+        }
+      }, state);
     }
   };
 
@@ -114,6 +140,8 @@ module.exports = function (opts) {
         },
 
         exit(path, state) {
+          path.traverse(traverseCreateElementCalls, state);
+
           let styles = _.map(state.styles, function (path) {
             return {
               node: path.node,
@@ -197,7 +225,6 @@ module.exports = function (opts) {
                  )
               ]
             ));
-
           }
         }
       },
@@ -209,7 +236,7 @@ module.exports = function (opts) {
           return;
         }
 
-        path.traverse(traverseExpression, state);
+        path.traverse(traverseStyleExpression, state);
       },
     }
   };
