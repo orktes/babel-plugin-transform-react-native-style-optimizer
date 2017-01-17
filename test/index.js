@@ -7,10 +7,14 @@ describe('transforms', function () {
   fixtures.forEach(function (dir) {
     it('should handle ' + dir, function () {
       var src = transform(fs.readFileSync(__dirname + '/fixtures/' + dir + '/actual.js'), {
-        plugins: ['syntax-jsx', require('../src/index.js')]
+        plugins: [
+          'transform-es2015-modules-commonjs',
+          'syntax-jsx',
+          require('../src/index.js')
+        ]
       });
       expect(
-        src.code.trim()
+        src.code.replace(/["']use strict["'];/, '').trim()
       ).to.equal(fs.readFileSync(__dirname + '/fixtures/' + dir + '/expected.js', 'utf8').trim())
     });
   });

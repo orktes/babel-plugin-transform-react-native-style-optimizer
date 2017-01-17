@@ -1,7 +1,7 @@
 import ReactNative, {StyleSheet} from 'react-native';
-import React from 'react';
+import SomeModule from 'someModule';
 
-<View style={[{width: 100}, styles.foo]} />;
+<View style={[{width: 100, height: SomeModule.height}, styles.foo]} />;
 
 const styles = StyleSheet.create({
   foo: {

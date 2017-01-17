@@ -14,7 +14,7 @@ module.exports = function (opts) {
   function compareObjectProps(aProperty, bProperty) {
     aProperty = aProperty[0] || aProperty;
     bProperty = bProperty[0] || bProperty;
-    
+
     if (t.isObjectProperty(aProperty) && t.isObjectProperty(bProperty)) {
       const aName = getPropertyName(aProperty);
       const bName = getPropertyName(bProperty);
@@ -69,13 +69,33 @@ module.exports = function (opts) {
     }
   };
 
+  const traverseRequires = {
+    CallExpression(path, state) {
+      const node = path.node;
+
+      if (!t.isIdentifier(node.callee) || path.node.callee.name !== 'require') {
+        return;
+      }
+
+      const firstArg = node.arguments[0];
+
+      if (t.isStringLiteral(firstArg) && firstArg.value === 'react-native') {
+        state.styleSheetIdentifier = t.memberExpression(
+          path.parentPath.node.id,
+          t.identifier('StyleSheet')
+        );
+        path.stop();
+      }
+    }
+  }
+
   return {
     visitor: {
       ImportSpecifier(path, state) {
         if (
           path.node.imported.name === 'StyleSheet' &&
           path.parentPath.node.source.value === 'react-native') {
-          state.styleSheetIdentifier = path.node.local;
+          state.hasStyleSheetImport = true;
         }
       },
       Program: {
@@ -112,7 +132,6 @@ module.exports = function (opts) {
             }
           });
 
-          let styleSheetIdentifier = state.styleSheetIdentifier;
           if (styles.length > 0) {
             const id = path.scope.generateUidIdentifier("styles");
             const styleObj = t.objectExpression(_.map(styles, function (style, i) {
@@ -135,6 +154,12 @@ module.exports = function (opts) {
               return t.objectProperty(identifier, node);
             }));
 
+            // We know style sheet was imported so lets find out the remapped name
+            if (state.hasStyleSheetImport) {
+              path.traverse(traverseRequires, state);
+            }
+
+            let styleSheetIdentifier = state.styleSheetIdentifier;
             if (!styleSheetIdentifier) {
               styleSheetIdentifier = t.memberExpression(
                 t.callExpression(
