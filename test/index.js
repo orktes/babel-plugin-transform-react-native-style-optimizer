@@ -5,17 +5,44 @@ var expect = require('chai').expect;
 
 describe('transforms', function () {
   fixtures.forEach(function (dir) {
-    it('should handle ' + dir, function () {
+    it('should handle ' + dir + ' when plugin before preset', function () {
       var src = transform(fs.readFileSync(__dirname + '/fixtures/' + dir + '/actual.js'), {
-        plugins: [
-          'transform-es2015-modules-commonjs',
-          'syntax-jsx',
-          require('../src/index.js')
-        ]
+        presets: [
+          {
+            plugins: [require('../src/index.js')]
+          },
+          'react-native'
+        ],
       });
+
+      if (process.env.RECORD_EXPECTED === 'yes') {
+        fs.writeFileSync(__dirname + '/fixtures/' + dir + '/expected.js', src.code, 'utf8')
+        return;
+      }
+
       expect(
-        src.code.replace(/["']use strict["'];/, '').trim()
-      ).to.equal(fs.readFileSync(__dirname + '/fixtures/' + dir + '/expected.js', 'utf8').trim())
+        src.code
+      ).to.equal(fs.readFileSync(__dirname + '/fixtures/' + dir + '/expected.js', 'utf8'));
+    });
+
+    it('should handle ' + dir  + ' when plugin after preset', function () {
+      var src = transform(fs.readFileSync(__dirname + '/fixtures/' + dir + '/actual.js'), {
+        presets: [
+          'react-native',
+          {
+            plugins: [require('../src/index.js')]
+          }
+        ],
+      });
+
+      if (process.env.RECORD_EXPECTED === 'yes') {
+        fs.writeFileSync(__dirname + '/fixtures/' + dir + '/expected.js', src.code, 'utf8')
+        return;
+      }
+
+      expect(
+        src.code
+      ).to.equal(fs.readFileSync(__dirname + '/fixtures/' + dir + '/expected.js', 'utf8'));
     });
   });
 });

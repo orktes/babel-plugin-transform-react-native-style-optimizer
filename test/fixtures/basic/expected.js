@@ -1,5 +1,1 @@
-<View style={_styles.s0} />;
-
-const _styles = require("react-native").StyleSheet.create({
-  s0: { width: 100 }
-});
+React.createElement(View,{style:{width:100}});var _styles=require("react-native").StyleSheet.create({s0:{width:100}});

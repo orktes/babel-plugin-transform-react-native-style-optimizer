@@ -70,6 +70,16 @@ module.exports = function (opts) {
   };
 
   const traverseRequires = {
+    // Handle if after react-native preset
+    ImportSpecifier(path, state) {
+      if (
+        path.node.imported.name === 'StyleSheet' &&
+        path.parentPath.node.source.value === 'react-native') {
+        state.styleSheetIdentifier = path.node.local;
+      }
+    },
+
+    // Handle if before react-native preset
     CallExpression(path, state) {
       const node = path.node;
 
