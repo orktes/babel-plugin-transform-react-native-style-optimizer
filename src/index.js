@@ -126,7 +126,7 @@ module.exports = function (opts) {
                 path.replaceWith(styleObjReference);
                 if (t.isArrayExpression(path.parentPath)) {
                   const arrayExpressionNode = path.parentPath.node;
-                  // Ugly but it 1:30am and I'm tired
+                  // Ugly but it's 1:30am and I'm tired
                   // TODO make sure uniq actually maintains order
                   arrayExpressionNode.elements = _.uniq(arrayExpressionNode.elements.reverse()).reverse();
                 }
