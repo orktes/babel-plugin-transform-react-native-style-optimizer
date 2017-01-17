@@ -4,7 +4,6 @@ module.exports = function (opts) {
   const t = opts.types;
 
   function getPropertyName(prop) {
-    prop = prop;
     if (t.isObjectProperty(prop) && t.isIdentifier(prop.key)) {
       return prop.key.name;
     }
