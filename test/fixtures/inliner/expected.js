@@ -1,0 +1,1 @@
+babelHelpers.jsx(View,{style:_styles.s0});var _styles=require("react-native").StyleSheet.create({s0:{width:100}});

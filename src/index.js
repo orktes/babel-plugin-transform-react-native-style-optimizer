@@ -80,10 +80,15 @@ module.exports = function (opts) {
     CallExpression(path, state) {
       const node = path.node;
 
-      if (
-          !t.isMemberExpression(node.callee) ||
-          !t.isIdentifier(node.callee.object, {name: 'React'}) ||
-          !t.isIdentifier(node.callee.property, {name: 'createElement'})) {
+      const isCreateElement = t.isMemberExpression(node.callee) &&
+        t.isIdentifier(node.callee.object, {name: 'React'}) &&
+        t.isIdentifier(node.callee.property, {name: 'createElement'});
+
+      const isBabelOptimizedCreateElement = t.isMemberExpression(node.callee) &&
+        t.isIdentifier(node.callee.object, {name: 'babelHelpers'}) &&
+        t.isIdentifier(node.callee.property, {name: 'jsx'});
+
+      if (!isCreateElement && !isBabelOptimizedCreateElement) {
         return;
       }
 

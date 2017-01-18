@@ -5,12 +5,18 @@ var expect = require('chai').expect;
 
 describe('transforms', function () {
   fixtures.forEach(function (dir) {
+    var options = {};
+    if (fs.existsSync(__dirname + '/fixtures/' + dir + '/options.json')) {
+      options = require(__dirname + '/fixtures/' + dir + '/options.json');
+    }
+
     var beforeSrc = transform(fs.readFileSync(__dirname + '/fixtures/' + dir + '/actual.js'), {
       presets: [
         {
           plugins: [require('../src/index.js')]
         },
-        'react-native'
+        'react-native',
+        options
       ],
     });
 
@@ -31,7 +37,8 @@ describe('transforms', function () {
           'react-native',
           {
             plugins: [require('../src/index.js')]
-          }
+          },
+          options
         ],
       });
 
