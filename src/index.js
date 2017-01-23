@@ -75,6 +75,18 @@ module.exports = function (opts) {
     }
   };
 
+  const traverseStyleProperty = {
+    ObjectProperty(path, state) {
+      if (
+        t.isIdentifier(path.node.key, {name: 'style'})
+      ) {
+        path.traverse(traverseStyleExpression, state);
+      }
+
+      path.skip();
+    }
+  }
+
   const traverseCreateElementCalls = {
     // Find React.createElementCalls
     CallExpression(path, state) {
@@ -92,29 +104,27 @@ module.exports = function (opts) {
         return;
       }
 
-      path.traverse({
-        ObjectProperty(path, state) {
-          if (
-            t.isIdentifier(path.node.key, {name: 'style'})
-          ) {
-            path.traverse(traverseStyleExpression, state);
-          }
+      path.traverse(traverseStyleProperty, state);
+    }
+  };
 
-          path.skip();
-        }
-      }, state);
+  const traverseRequiresImportSpecifier = (path, state) => {
+    if (path.parentPath.node.source.value === 'react-native') {
+      state.foundReactNativeImport = path.parentPath;
+      if (path.node.imported && path.node.imported.name === 'StyleSheet') {
+        state.styleSheetIdentifier = path.node.local;
+        path.stop();
+      }
     }
   };
 
   const traverseRequires = {
     // Handle if after react-native preset
-    ImportSpecifier(path, state) {
-      if (
-        path.node.imported.name === 'StyleSheet' &&
-        path.parentPath.node.source.value === 'react-native') {
-        state.styleSheetIdentifier = path.node.local;
-      }
+    ImportDefaultSpecifier(path, state) {
+      traverseRequiresImportSpecifier(path, state);
     },
+
+    ImportSpecifier: traverseRequiresImportSpecifier,
 
     // Handle if before react-native preset
     CallExpression(path, state) {
@@ -139,18 +149,43 @@ module.exports = function (opts) {
   return {
     visitor: {
       ImportSpecifier(path, state) {
-        if (
-          path.node.imported.name === 'StyleSheet' &&
-          path.parentPath.node.source.value === 'react-native') {
+        if (path.parentPath.node.source.value === 'react-native') {
+          state.hasStyleSheetImport = true;
+        }
+      },
+      ImportDefaultSpecifier(path, state) {
+        if (path.parentPath.node.source.value === 'react-native') {
+          state.hasStyleSheetImport = true;
+        }
+      },
+      CallExpression(path, state) {
+        const node = path.node;
+
+        if (!t.isIdentifier(node.callee) || path.node.callee.name !== 'require') {
+          return;
+        }
+
+        const firstArg = node.arguments[0];
+
+        if (t.isStringLiteral(firstArg) && firstArg.value === 'react-native') {
           state.hasStyleSheetImport = true;
         }
       },
       Program: {
         enter(path, state) {
           state.styles = [];
+          if (state.file.opts.filename && state.file.opts.filename.indexOf('/node_modules/') !== -1) {
+            path.stop();
+            return;
+          }
         },
 
         exit(path, state) {
+          if (state.file.opts.filename.indexOf('/node_modules/') !== -1) {
+            path.stop();
+            return;
+          }
+
           path.traverse(traverseCreateElementCalls, state);
 
           let styles = _.map(state.styles, function (path) {
@@ -206,6 +241,14 @@ module.exports = function (opts) {
             // We know style sheet was imported so lets find out the remapped name
             if (state.hasStyleSheetImport) {
               path.traverse(traverseRequires, state);
+
+              // Check if we actually found the ImportSpecifier or is react-native just used otherwise
+              if (!state.styleSheetIdentifier && state.foundReactNativeImport) {
+                state.styleSheetIdentifier = path.scope.generateUidIdentifier('StyleSheet');
+                const importSpecifier = t.importSpecifier(state.styleSheetIdentifier, t.identifier("StyleSheet"));
+                state.foundReactNativeImport.node.specifiers.push(importSpecifier);
+                state.foundReactNativeImport.replaceWith(state.foundReactNativeImport.node);
+              }
             }
 
             let styleSheetIdentifier = state.styleSheetIdentifier;

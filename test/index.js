@@ -5,6 +5,10 @@ var expect = require('chai').expect;
 
 describe('transforms', function () {
   fixtures.forEach(function (dir) {
+    if (process.env.ONLY_TEST && process.env.ONLY_TEST !== dir) {
+      return;
+    }
+
     var options = {};
     if (fs.existsSync(__dirname + '/fixtures/' + dir + '/options.json')) {
       options = require(__dirname + '/fixtures/' + dir + '/options.json');
